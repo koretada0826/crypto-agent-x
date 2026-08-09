@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CRYPTO AGENT X — 自律型仮想通貨相場分析エージェント</title>
+<meta name="description" content="24時間市場を監視する自律型仮想通貨エージェント。価格・Funding・建玉・清算・オンチェーン・センチメントを実データで統合分析。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=Orbitron:wght@600;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css?v=7" />
+</head>
+<body>
+<div id="bg-fx"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">
+        <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+          <path d="M6 6 L18 20 L6 34 M34 6 L22 20 L34 34" fill="none" stroke="url(#lg)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">CRYPTO <b>AGENT X</b></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#markets">Markets</a>
+      <a href="#deriv">Derivatives</a>
+      <a class="active" href="#dashboard">Dashboard</a>
+      <a href="#strategy">Analysis</a>
+      <a href="/cockpit.html" style="color:#31e0d6">◆ 裁量コックピット</a>
+      <a href="#security">Security</a>
+    </nav>
+    <div class="nav-right">
+      <span class="live-clock" id="liveClock">— <b>接続中…</b></span>
+      <button class="btn btn-launch" id="launchBtn">🚀 エージェント稼働中</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="hero-badge"><span class="dot"></span> LIVE · 実データ自律監視中</div>
+      <h1 class="hero-title">
+        <span class="t-white">24時間市場を監視する</span><br/>
+        <span class="t-grad">自律型仮想通貨分析エージェント</span>
+      </h1>
+      <p class="hero-sub">価格・Funding・建玉・清算・ロングショート・センチメントを<br/>
+        取引所の実APIから収集し、需給を統合分析。データはすべてリアルタイム。</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="startBtn">ダッシュボードを見る →</button>
+        <button class="btn btn-ghost" id="demoBtn">▶ 本日の目線</button>
+      </div>
+      <div class="hero-stats" id="heroStats">
+        <div class="hstat"><span class="ic">🌐</span><div><b id="hsMcap">—</b><small>暗号資産 時価総額</small></div></div>
+        <div class="hstat"><span class="ic">₿</span><div><b id="hsDom">—</b><small>BTCドミナンス</small></div></div>
+        <div class="hstat"><span class="ic">😱</span><div><b id="hsFng">—</b><small>Fear &amp; Greed</small></div></div>
+        <div class="hstat"><span class="ic">📡</span><div><b id="hsSrc">7</b><small>接続データ源</small></div></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <canvas id="globe"></canvas>
+      <div class="core-label">
+        <div class="core-title">AGENT<br/>CORE</div>
+        <div class="core-status"><span class="pulse"></span>ACTIVE</div>
+      </div>
+      <div class="node node-l" style="top:22%"><span class="ni">◈</span> MARKET DATA</div>
+      <div class="node node-l" style="top:44%"><span class="ni">⛓</span> DERIVATIVES</div>
+      <div class="node node-l" style="top:66%"><span class="ni">◎</span> SENTIMENT</div>
+      <div class="node node-r" style="top:18%"><span class="ni">◱</span> ANALYZE</div>
+      <div class="node node-r" style="top:37%"><span class="ni">◈</span> DECIDE</div>
+      <div class="node node-r" style="top:56%"><span class="ni">⚡</span> LIQUIDATIONS</div>
+      <div class="node node-r" style="top:75%"><span class="ni">📈</span> LEARN</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARKET OVERVIEW ============ -->
+<section class="dash" id="dashboard">
+  <div class="sec-mini"><span class="sm-dot"></span>MARKET OVERVIEW <em>実データ / リアルタイム</em></div>
+
+  <!-- price ticker cards -->
+  <div class="price-cards" id="priceCards">
+    <div class="pc skeleton" data-sym="BTC"></div>
+    <div class="pc skeleton" data-sym="ETH"></div>
+    <div class="pc skeleton" data-sym="SOL"></div>
+  </div>
+
+  <div class="dash-wrap grid5" id="markets">
+    <!-- 総市場 -->
+    <article class="card">
+      <h3 class="card-h">グローバル市況</h3>
+      <div class="kv"><span>暗号資産 時価総額</span><b id="gMcap">—</b></div>
+      <div class="kv"><span>24h 変動</span><b id="gMcapCh">—</b></div>
+      <div class="kv"><span>24h 出来高</span><b id="gVol">—</b></div>
+      <div class="kv"><span>BTC ドミナンス</span><b id="gDomB">—</b></div>
+      <div class="kv"><span>ETH ドミナンス</span><b id="gDomE">—</b></div>
+      <div class="kv"><span>上場銘柄数</span><b id="gCoins">—</b></div>
+    </article>
+
+    <!-- Fear & Greed -->
+    <article class="card">
+      <h3 class="card-h">Fear &amp; Greed <span class="muted">恐怖&amp;強欲</span></h3>
+      <div class="gauge-wrap"><canvas id="gauge"></canvas>
+        <div class="gauge-label"><b id="fngLabel">—</b><small><span id="fngVal">—</span> / 100</small></div>
+      </div>
+      <canvas class="spark" id="fngSpark" height="42"></canvas>
+      <div class="mini-note">直近30日の推移</div>
+    </article>
+
+    <!-- ヒートマップ -->
+    <article class="card c-heat">
+      <h3 class="card-h">マーケットヒートマップ <span class="muted">(24H)</span></h3>
+      <div class="heatmap" id="heatmap"><div class="hm-load">読み込み中…</div></div>
+    </article>
+
+    <!-- 判断ログ -->
+    <article class="card c-log">
+      <h3 class="card-h">エージェント判断ログ <span class="live-tag">AUTO</span></h3>
+      <ul class="log-list" id="logList"><li class="log-load">エージェント評価中…</li></ul>
+    </article>
+
+    <!-- 自律実行フロー -->
+    <article class="card c-flow">
+      <h3 class="card-h">自律実行フロー</h3>
+      <div class="flow" id="flow">
+        <div class="flow-step" data-i="0"><div class="fs-ic">◱</div><b>Collect</b><small>実データ収集</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-i="1"><div class="fs-ic">◈</div><b>Analyze</b><small>需給・目線判定</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-i="2"><div class="fs-ic">⚡</div><b>Monitor</b><small>清算・急変監視</small></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-i="3"><div class="fs-ic">↻</div><b>Update</b><small>目線を更新</small></div>
+      </div>
+      <div class="flow-status">
+        <small>現在のステータス</small>
+        <div class="fs-row"><b class="grn" id="flowPhase">Collect フェーズ</b><span id="flowPct">—</span></div>
+        <div class="fs-bar"><i id="flowBar" style="width:0%"></i></div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ============ DERIVATIVES ============ -->
+  <div class="sec-mini" id="deriv"><span class="sm-dot"></span>DERIVATIVES 需給 <em>Binance · Bybit · OKX 実データ</em></div>
+  <div class="dash-wrap grid4">
+
+    <!-- Funding cross-exchange -->
+    <article class="card">
+      <h3 class="card-h">Funding Rate <span class="muted">クロス取引所</span></h3>
+      <table class="dtable" id="fundingTable">
+        <thead><tr><th></th><th>Binance</th><th>Bybit</th><th>OKX</th><th>平均</th></tr></thead>
+        <tbody><tr><td colspan="5" class="tload">取得中…</td></tr></tbody>
+      </table>
+      <div class="mini-note" id="fundingNote">＋＝ロング支払（過熱） / −＝ショート支払（踏み上げ余地）</div>
+    </article>
+
+    <!-- Open Interest -->
+    <article class="card">
+      <h3 class="card-h">Open Interest <span class="muted">建玉</span></h3>
+      <table class="dtable" id="oiTable">
+        <thead><tr><th></th><th>合計 OI</th><th>1h</th><th>24h</th></tr></thead>
+        <tbody><tr><td colspan="4" class="tload">取得中…</td></tr></tbody>
+      </table>
+      <div class="mini-note">Binance+Bybit+OKX 合算 / 変化はBinance建玉ベース</div>
+    </article>
+
+    <!-- Long/Short ratio -->
+    <article class="card">
+      <h3 class="card-h">ロング / ショート比率</h3>
+      <div id="lsBlocks"><div class="tload">取得中…</div></div>
+      <div class="mini-note">口座比・大口ポジ比・Taker売買比（Binance）</div>
+    </article>
+
+    <!-- Live liquidations -->
+    <article class="card c-liq">
+      <h3 class="card-h">清算ライブフィード <span class="live-tag">WS</span></h3>
+      <div class="liq-summary">
+        <div class="liq-box long"><small>ロング清算</small><b id="liqLong">$0</b></div>
+        <div class="liq-box short"><small>ショート清算</small><b id="liqShort">$0</b></div>
+      </div>
+      <ul class="liq-list" id="liqList"><li class="liq-wait">清算イベント待機中…（Binance全銘柄）</li></ul>
+      <div class="mini-note">起動後のライブ計測値（Binance Futures WebSocket）</div>
+    </article>
+  </div>
+
+  <!-- ============ CHART ============ -->
+  <div class="dash-wrap grid-chart">
+    <article class="card c-chart">
+      <div class="card-h-row">
+        <h3 class="card-h">価格チャート <span class="muted" id="chartSym">BTC/USDT</span></h3>
+        <div class="chart-ctrls">
+          <div class="range-tabs" id="symTabs"><button class="on">BTC</button><button>ETH</button><button>SOL</button></div>
+          <div class="range-tabs" id="tfTabs"><button>15m</button><button>1h</button><button>4h</button><button class="on">1d</button></div>
+        </div>
+      </div>
+      <div class="last-price" id="btcLast">—</div>
+      <canvas id="candles"></canvas>
+    </article>
+
+    <article class="card c-depth">
+      <h3 class="card-h">主要指標サマリー <span class="muted" id="sumSym">BTC</span></h3>
+      <div class="summ" id="summary"><div class="tload">集計中…</div></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ TRADE DESK ============ -->
+<section class="dash" id="tradedesk">
+  <div class="sec-mini"><span class="sm-dot"></span>TRADE DESK
+    <em>高信頼度シグナル · ペーパートレード（承認制・実弾なし）</em>
+    <span class="desk-eq" id="deskEquity"></span>
+  </div>
+  <div class="dash-wrap grid-desk">
+    <article class="card c-sig2"><h3 class="card-h">エントリー候補 <span class="live-tag">AI判定</span></h3><div id="signalCard"><div class="tload">シグナル評価中…</div></div></article>
+    <article class="card"><h3 class="card-h">実測バックテスト <span class="muted" id="btSym">BTC</span></h3><div id="btCard"><div class="tload">計算中…</div></div></article>
+    <article class="card"><h3 class="card-h">保有ポジション <span class="muted">ペーパー</span></h3><div id="posCard"><div class="pos-empty">読み込み中…</div></div></article>
+    <article class="card"><h3 class="card-h">実績 / 履歴</h3><div id="histCard"></div></article>
+  </div>
+  <div class="dash-wrap grid-micro">
+    <article class="card"><h3 class="card-h">板情報 <span class="muted" id="depthSym">BTC</span></h3><div id="depthCard"><div class="tload">取得中…</div></div></article>
+    <article class="card"><h3 class="card-h">アルト強弱 <span class="muted">vs BTC (24h)</span></h3><div id="altCard"><div class="tload">集計中…</div></div></article>
+    <article class="card c-log"><h3 class="card-h">執行ログ <span class="live-tag">DESK</span></h3><ul class="log-list" id="deskLog"><li class="log-load">待機中…</li></ul></article>
+  </div>
+</section>
+
+<!-- ============ 群衆ポジショニング可視化 ============ -->
+<section class="dash" id="positioning">
+  <div class="sec-mini"><span class="sm-dot"></span>群衆ポジショニング・インテリジェンス
+    <em>散りL/S・成行フロー・OIレジーム / 21日後方研究（地合い依存・未検証＝状況把握用）</em></div>
+  <div class="dash-wrap grid-pos" id="posGrid">
+    <article class="card"><h3 class="card-h">読み込み中… <span class="muted">BTC</span></h3></article>
+    <article class="card"><h3 class="card-h">読み込み中… <span class="muted">ETH</span></h3></article>
+  </div>
+  <div class="pos-caveat" id="posCaveat"></div>
+</section>
+
+<!-- ============ 本日の目線 (自律生成) ============ -->
+<section class="report" id="strategy">
+  <div class="sec-head">
+    <h2>本日の目線 <span class="muted">/ AUTONOMOUS REPORT</span></h2>
+    <div class="report-meta">最終評価 <b id="reportTime">—</b> · エージェントが実データから自動生成</div>
+  </div>
+  <div class="report-grid">
+    <div class="rcard bias">
+      <h4>エージェントの目線</h4>
+      <div id="biasRows"><div class="tload">評価中…</div></div>
+      <div class="bias-verdict" id="biasVerdict"></div>
+      <p class="bias-note" id="biasNote">実データ（価格・Funding・OI・ロングショート・Fear&amp;Greed）からルールベースで自動判定します。</p>
+    </div>
+    <div class="rcard"><h4>▲ 上がる理由 <span class="muted">検出中</span></h4><ul id="reasonsUp"><li>評価中…</li></ul></div>
+    <div class="rcard"><h4>▼ 下がる理由 <span class="muted">検出中</span></h4><ul id="reasonsDown"><li>評価中…</li></ul></div>
+    <div class="rcard levels">
+      <h4>リアルタイム値</h4>
+      <table class="lv-table" id="lvTable"><tbody><tr><td class="tload">取得中…</td></tr></tbody></table>
+      <p class="bias-note">※ 本ツールは相場環境の分析支援が目的で、売買を推奨するものではありません。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="features" id="features">
+  <div class="sec-head"><h2>エージェントの強み</h2><div class="muted">Autonomous · Real-data · Always-on</div></div>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-ic">◆</div><h4>実データ統合</h4><p>CoinGecko・Binance・Bybit・OKX・alternative.me の公開APIから価格/需給/センチメントを収集。</p></div>
+    <div class="feat"><div class="feat-ic">⚡</div><h4>清算リアルタイム監視</h4><p>Binance Futures WebSocketで全銘柄の清算を秒単位で捕捉し、踏み上げ・投げを検知。</p></div>
+    <div class="feat"><div class="feat-ic">⛓</div><h4>需給の先読み</h4><p>Funding・建玉・ロングショート比の乖離から、狩られやすい方向を自律判定。</p></div>
+    <div class="feat"><div class="feat-ic">◈</div><h4>自律評価ループ</h4><p>数十秒ごとに再収集・再評価し、目線と判断ログを自動更新。人手の指示は不要。</p></div>
+  </div>
+</section>
+
+<!-- ============ SECURITY ============ -->
+<section class="security" id="security">
+  <div class="sec-head"><h2>接続・セキュリティ</h2><div class="muted">Data sources & protection</div></div>
+  <div class="sec-grid">
+    <div class="secbox"><div class="feat-ic">📡</div><h4>公開API接続</h4><p>無認証の公開エンドポイントのみ使用。APIキー不要でブラウザから直接取得。</p></div>
+    <div class="secbox"><div class="feat-ic">🔒</div><h4>キー保護設計</h4><p>取引所APIキーはAES-256で暗号化管理する設計（自動発注導入時）。</p></div>
+    <div class="secbox"><div class="feat-ic">📋</div><h4>データ記録</h4><p>収集した価格/OI/Funding とエッジ検証結果をサーバに保存 (JSONL)。判断の根拠を追跡可能。</p></div>
+    <div class="secbox highlight"><div class="feat-ic">🏦</div><h4>GMOコイン連携 <span class="soon">開発中</span></h4><p>国内取引所GMOコインのAPIと連携し、円建て残高取得・自動発注に対応予定。約定実行はユーザー承認制。</p></div>
+  </div>
+  <div class="src-bar" id="srcBar"></div>
+</section>
+
+<footer class="footer">
+  <div class="brand"><span class="brand-name">CRYPTO <b>AGENT X</b></span></div>
+  <p class="disclaimer">※ 表示データは各取引所・データ提供元の公開APIから取得したリアルタイム値です（遅延・欠損の可能性あり）。本ツールは相場環境の分析支援を目的とし、売買を推奨するものではありません。投資判断は自己責任で行ってください。</p>
+  <small>© 2026 CRYPTO AGENT X · Data: CoinGecko / Binance / Bybit / OKX / alternative.me</small>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/globe.js?v=7"></script>
+<script src="js/data.js?v=7"></script>
+<script src="js/strategy.js?v=7"></script>
+<script src="js/dashboard.js?v=7"></script>
+<script src="js/trader.js?v=7"></script>
+</body>
+</html>
