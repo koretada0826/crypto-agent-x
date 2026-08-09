@@ -33,12 +33,18 @@
 
   async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); }
 
+  // ★公開デプロイ(Vercel等)ではローカルサーバAPIが無いので、Macが数分毎にpushする静的スナップショットを読む。
+  //   localhost/127.0.0.1(実運用中のMac)では従来通りライブAPI(/api/paper)を直接叩く。
+  const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
+  const SNAPSHOT_URL = 'https://raw.githubusercontent.com/koretada0826/crypto-agent-x/snapshot/web/snapshot.json';
+  const paperEndpoint = () => IS_LOCAL ? '/api/paper' : (SNAPSHOT_URL + '?t=' + Math.floor(Date.now() / 60000));
+
   /* ---------- SERVER paper account (autonomous 24/7 の口座を表示) ---------- */
   let sp = null;                 // server paper snapshot
   let serverOK = false;
   async function pollServerPaper() {
-    try { sp = await getJSON('/api/paper'); serverOK = true; renderServerPaper(); }
-    catch (e) { serverOK = false; }   // サーバ未起動時はローカル表示にフォールバック
+    try { sp = await getJSON(paperEndpoint()); serverOK = true; renderServerPaper(); }
+    catch (e) { serverOK = false; }   // サーバ/スナップショット未取得時はローカル表示にフォールバック
   }
   function renderServerPaper() {
     if (!sp) return;

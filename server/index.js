@@ -326,6 +326,33 @@ function autoPromoteTrend(scan) {
     }
   }
 }
+/* ★ポートフォリオ公開用スナップショット: paper全体＋エクイティ曲線＋エッジ別内訳。publish_snapshot.shがcurlしてGitHubへpush→Vercelの静的画面が読む */
+function buildSnapshot() {
+  const s = paperStats();
+  // エクイティ曲線: history(新しい順)を時系列昇順に並べ、startからの累積で復元
+  const hist = [...(paper.history || [])].sort((a, b) => a.closedT - b.closedT);
+  let eq = paper.start || 10000;
+  const equityCurve = [{ t: hist.length ? hist[0].openedT || hist[0].closedT : Date.now(), equity: eq }];
+  for (const h of hist) { eq += h.pnl; equityCurve.push({ t: h.closedT, equity: +eq.toFixed(2) }); }
+  // エッジ別内訳
+  const byEdge = {};
+  for (const h of (paper.history || [])) { const b = byEdge[h.type] || (byEdge[h.type] = { n: 0, win: 0, pnl: 0, R: 0 }); b.n++; b.pnl += h.pnl; b.R += h.R; if (h.pnl > 0) b.win++; }
+  for (const k of Object.keys(byEdge)) { byEdge[k].pnl = +byEdge[k].pnl.toFixed(2); byEdge[k].R = +byEdge[k].R.toFixed(2); byEdge[k].winRate = Math.round(100 * byEdge[k].win / byEdge[k].n); }
+  return Object.assign({}, s, { updatedAt: Date.now(), equityCurve, byEdge, cyclesRun: stat.cycles, uptimeStartedAt: stat.started });
+}
+/* ★ポートフォリオ公開: buildSnapshot()を.snapshot-wt(snapshotブランチのworktree)へ書き出しGitHubへforce-push。
+   Vercelの静的画面が raw.githubusercontent.com/.../snapshot/web/snapshot.json を読む。
+   launchd bashはDesktopがTCC保護で不可→既にDesktopアクセス権を持つ本サーバ(node)が実行。 */
+const SNAP_WT = path.join(__dirname, '..', '.snapshot-wt');
+function publishSnapshot() {
+  try {
+    const dir = path.join(SNAP_WT, 'web');
+    if (!fs.existsSync(dir)) return;   // worktree未セットアップならスキップ
+    fs.writeFileSync(path.join(dir, 'snapshot.json'), JSON.stringify(buildSnapshot()));
+    const cmd = 'git add web/snapshot.json && (git diff --cached --quiet || ((git commit --amend --no-edit -q 2>/dev/null || git commit -m snapshot -q) && git push -f -q origin snapshot))';
+    exec(cmd, { cwd: SNAP_WT, timeout: 60000 }, (e) => { if (e) console.warn('[SNAPSHOT] publish:', e.message); });
+  } catch (e) { console.warn('[SNAPSHOT] err', e.message); }
+}
 /* ★稼ぐ仕組み C: 週次スコアカード — 実測をエッジ別に自動集計＋通知 */
 function weeklyScorecard() {
   const now = Date.now();
@@ -995,6 +1022,9 @@ const server = http.createServer((req, res) => {
   if (u.pathname === '/api/paper') {
     return json(res, paperStats());
   }
+  if (u.pathname === '/api/snapshot') {   // ★ポートフォリオ公開用: paper全体＋エクイティ曲線＋エッジ別内訳の静的スナップショット
+    return json(res, buildSnapshot());
+  }
   if (u.pathname === '/api/structural') {
     return json(res, structuralStats());
   }
@@ -1059,4 +1089,6 @@ server.listen(PORT, () => {
   setInterval(runResearch, RESEARCH_INTERVAL); // 以降2h毎に銘柄ローテで自律研究
   if (!paper.lastScorecardT) { paper.lastScorecardT = Date.now(); savePaper(); }  // ★C: 週次スコアカードの起点
   setInterval(weeklyScorecard, 6 * 3600 * 1000);  // 6h毎に「7日経過したか」を判定し週次成績を集計＋通知
+  setTimeout(publishSnapshot, 15000);             // 起動15秒後に初回スナップショット発行
+  setInterval(publishSnapshot, 5 * 60 * 1000);    // 以降5分毎にポートフォリオ用スナップショットをGitHubへpush
 });

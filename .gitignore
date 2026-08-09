@@ -24,3 +24,7 @@ secrets.json
 
 # Claude Code 内部
 .claude/
+
+# snapshot公開用worktree(ローカルのみ)
+.snapshot-wt/
+scripts/*.log
