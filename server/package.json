@@ -1,0 +1,11 @@
+{
+  "name": "crypto-agent-x-server",
+  "version": "1.0.0",
+  "description": "CRYPTO AGENT X — OI/Funding/L-S collector & static server (zero-dependency)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": { "node": ">=18" },
+  "private": true
+}
