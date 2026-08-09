@@ -1,0 +1,26 @@
+# 実行時データ（152M・自動生成される市場ログ/検証ログ）
+server/data/
+
+# 依存
+node_modules/
+
+# バックアップ・一時
+*.backup.*
+paper_archive_*.json
+promoted-edges.json
+*.log
+
+# OS / エディタ
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ローカル設定・機密（将来API鍵を置く場合の保険）
+.env
+.env.*
+*.key
+secrets.json
+
+# Claude Code 内部
+.claude/
