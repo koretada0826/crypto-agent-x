@@ -64,7 +64,7 @@ b{font-weight:700}
   padding:6px 13px;border-radius:999px;letter-spacing:1px}
 .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.3}}
-.hero-title{font-size:clamp(30px,4.4vw,62px);line-height:1.12;font-weight:900;margin:20px 0 18px;letter-spacing:-.5px}
+.hero-title{font-size:clamp(30px,4.4vw,62px);line-height:1.12;font-weight:900;margin:20px 0 18px;letter-spacing:-.5px;word-break:keep-all;overflow-wrap:break-word}
 .t-white{color:#f4f8ff} .t-grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero-sub{color:var(--mut);font-size:16px;max-width:560px}
 .hero-actions{display:flex;gap:14px;margin:26px 0 30px}
